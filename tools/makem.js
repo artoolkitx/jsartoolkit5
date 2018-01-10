@@ -49,7 +49,10 @@ var ar_sources = [
 	'AR/*.c',
 	'ARICP/*.c',
 	'ARMulti/*.c',
-	'Gl/gsub_lite.c',
+    'Video/VideoLuma.c',
+    'ARUtil/log.c',
+    'ARUtil/file_utils.c',
+
 	// 'Gl/gsub_es2.c',
 
 	// 'ARWrapper/ARToolkitWrapperExportedAPI.cpp',
@@ -120,13 +123,20 @@ if (HAVE_NFT) DEFINES += ' -D HAVE_NFT ';
 var FLAGS = '' + OPTIMIZE_FLAGS;
 FLAGS += ' -Wno-warn-absolute-paths ';
 FLAGS += ' -s TOTAL_MEMORY=' + MEM + ' ';
+FLAGS += ' -s USE_ZLIB=1';
 // FLAGS += ' -s FULL_ES2=1 '
-FLAGS += ' -s NO_BROWSER=1 '; // for 20k less
+// FLAGS += ' -s NO_BROWSER=1 '; // for 20k less
 FLAGS += ' --memory-init-file 0 '; // for memless file
 
 var PRE_FLAGS = ' --pre-js ' + path.resolve(__dirname, '../js/artoolkit.api.js') +' ';
 
 FLAGS += ' --bind ';
+FLAGS += ' -msse';
+FLAGS += ' -msse2';
+FLAGS += ' -msse3';
+FLAGS += ' -mssse3';
+
+
 
 /* DEBUG FLAGS */
 var DEBUG_FLAGS = ' -g ';

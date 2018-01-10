@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <AR/ar.h>
-#include <AR/gsub_lite.h>
-// #include <AR/gsub_es2.h>
 #include <AR/arMulti.h>
 #include <emscripten.h>
 #include <string>
 #include <vector>
 #include <unordered_map>
 #include <AR/config.h>
+#include <AR/paramGL.h>
+#include <AR/video.h>
 
 struct multi_marker {
 	int id;
@@ -39,7 +39,8 @@ struct arController {
 	int patt_id = 0; // Running pattern marker id
 
 	ARdouble cameraLens[16];
-
+    ARVideoLumaInfo *lumaInfo = NULL;
+    AR_PIXEL_FORMAT pixFormat = AR_PIXEL_FORMAT_RGBA;
 };
 
 std::unordered_map<int, arController> arControllers;
@@ -97,6 +98,9 @@ extern "C" {
 	int teardown(int id) {
 		if (arControllers.find(id) == arControllers.end()) { return -1; }
 		arController *arc = &(arControllers[id]);
+
+        // Cleanup luma.
+        arVideoLumaFinal(&(arc->lumaInfo));
 
 		if (arc->videoFrame) {
 			free(arc->videoFrame);
@@ -169,7 +173,7 @@ extern "C" {
 			return -1;
 		}
 		// AR_DEFAULT_PIXEL_FORMAT
-		int set = arSetPixelFormat(arc->arhandle, AR_PIXEL_FORMAT_RGBA);
+		int set = arSetPixelFormat(arc->arhandle, arc->pixFormat);
 
 		// ARLOGi("setCamera(): arCreateHandle done\n");
 
@@ -184,7 +188,7 @@ extern "C" {
 		arPattAttach(arc->arhandle, arc->arPattHandle);
 		// ARLOGi("setCamera(): Pattern handler attached.\n");
 
-		arglCameraFrustum(&((arc->paramLT)->param), arc->nearPlane, arc->farPlane, arc->cameraLens);
+		arglCameraFrustumRH(&((arc->paramLT)->param), arc->nearPlane, arc->farPlane, arc->cameraLens);
 
 		return 0;
 	}
@@ -613,8 +617,27 @@ extern "C" {
 		if (arControllers.find(id) == arControllers.end()) { return ARCONTROLLER_NOT_FOUND; }
 		arController *arc = &(arControllers[id]);
 
-		return arDetectMarker( arc->arhandle, arc->videoFrame );
+        // Convert video frame to AR2VideoBufferT
+        AR2VideoBufferT buff = {0};
+        buff.buff = arc->videoFrame;
+        buff.fillFlag = 1;
+
+        if (arc->pixFormat == AR_PIXEL_FORMAT_MONO) {
+            buff.buffLuma = buff.buff;
+        } else {
+            if (!arc->lumaInfo) {
+                arc->lumaInfo = arVideoLumaInit(arc->width, arc->height, arc->pixFormat);
+                if (!arc->lumaInfo) {
+                    ARLOGe("Error: unable to initialise luma conversion.\n");
+                    exit(-1);
+                }
+            }
+            buff.buffLuma = arVideoLuma(arc->lumaInfo, buff.buff);
+        }
+
+		return arDetectMarker( arc->arhandle, &buff);
 	}
+    
 
 	int getMarkerNum(int id) {
 		if (arControllers.find(id) == arControllers.end()) { return ARCONTROLLER_NOT_FOUND; }
@@ -808,6 +831,7 @@ extern "C" {
 			arc->cameraLens,
 			gTransform
 		);
+
 
 		return arc->id;
 	}

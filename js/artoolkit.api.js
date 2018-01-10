@@ -1396,12 +1396,14 @@
 		this._src = '';
         this.complete = false;
         if(!onload) {
-            throw "onload callback needs to be defined";
+            this.onload = function(){console.log('Successfully loaded');};
+            console.warn("onload callback should be defined");
         } else {
             this.onload = onload;
         }
         if(!onerror) {
-            throw "onerror callback needs to be defined";
+            this.onerror = function(err) {console.error("Error: " + err)};
+            console.warn("onerror callback should be defined");
         } else {
             this.onerror = onerror;
         }

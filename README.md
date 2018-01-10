@@ -27,8 +27,6 @@ When writing JavaScript and making changes be aware that the emscripten uglifier
 
 ### Build using Docker
 1. Install Docker (if you havn't already) [Docker](https://www.docker.com/) -> Get Docker
-2. Ensure we got a valid config file for ARToolKit5 
-    - `mv emscripten/artoolkit5/include/AR/config.h.in emscripten/artoolkit5/include/AR/config.h`
 3. From inside jsartoolkit5 directory run `docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten-slim:sdk-incoming-64bit bash`
 4. `docker exec emscripten npm run build`
 
@@ -47,7 +45,6 @@ When writing JavaScript and making changes be aware that the emscripten uglifier
 
 3. Building
   1. Make sure `EMSCRIPTEN` env variable is set (e.g. `EMSCRIPTEN=/usr/lib/emsdk_portable/emscripten/master/`)
-  2. Rename the `ARTOOLKIT5_ROOT/include/AR/config.h.in` file to `config.h`
   3. Run `npm run build`
   
 During development, you can run ```npm run watch```, it will rebuild the library everytime you change ```./js/``` directory.

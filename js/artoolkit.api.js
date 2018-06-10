@@ -197,8 +197,8 @@
 			}
 
 			visible.inCurrent = true;
-            this.transMatToGLMat(visible.matrix, this.transform_mat);
-            this.transformGL_RH = this.arglCameraViewRHf(this.transform_mat);
+            ARController.transMatToGLMat(visible.matrix, this.transform_mat);
+            this.transformGL_RH = ARController.arglCameraViewRHf(this.transform_mat);
 			this.dispatchEvent({
 				name: 'getMarker',
 				target: this,
@@ -218,8 +218,8 @@
 			visible = false;
 
 			artoolkit.getTransMatMultiSquareRobust(this.id, i);
-			this.transMatToGLMat(this.marker_transform_mat, this.transform_mat);
-            this.transformGL_RH = this.arglCameraViewRHf(this.transform_mat);
+			ARController.transMatToGLMat(this.marker_transform_mat, this.transform_mat);
+            this.transformGL_RH = ARController.arglCameraViewRHf(this.transform_mat);
             
 			for (j=0; j<subMarkerCount; j++) {
                 multiEachMarkerInfo = this.getMultiEachMarker(i, j);
@@ -241,8 +241,8 @@
 			if (visible) {
 				for (j=0; j<subMarkerCount; j++) {
 					multiEachMarkerInfo = this.getMultiEachMarker(i, j);
-                    this.transMatToGLMat(this.marker_transform_mat, this.transform_mat);
-                    this.transformGL_RH = this.arglCameraViewRHf(this.transform_mat);
+                    ARController.transMatToGLMat(this.marker_transform_mat, this.transform_mat);
+                    this.transformGL_RH = ARController.arglCameraViewRHf(this.transform_mat);
                     
 					this.dispatchEvent({
 						name: 'getMultiMarkerSub',
@@ -506,6 +506,8 @@
 	};
 
 	/**
+     * T.B.: Make this function static as it is a util function and doesn't manipulate the ARController object (this)
+     * 
 		Converts the given 3x4 marker transformation matrix in the 12-element transMat array
 		into a 4x4 WebGL matrix and writes the result into the 16-element glMat array.
 
@@ -515,7 +517,7 @@
 		@param {Float64Array} glMat The 4x4 GL transformation matrix.
 		@param {number} [scale] The scale for the transform.
 	*/
-	ARController.prototype.transMatToGLMat = function(transMat, glMat, scale) {
+	ARController.transMatToGLMat = function(transMat, glMat, scale) {
         if(glMat == undefined){
             glMat = new Float64Array(16);
         }
@@ -544,6 +546,8 @@
     };
 
     /**
+     * T.B.: Make this function static as it is a util function and doesn't manipulate the ARController object (this)
+
 		Converts the given 4x4 openGL matrix in the 16-element transMat array
 		into a 4x4 OpenGL Right-Hand-View matrix and writes the result into the 16-element glMat array.
 
@@ -553,7 +557,7 @@
 		@param {Float64Array} [glRhMatrix] The 4x4 GL right hand transformation matrix.
 		@param {number} [scale] The scale for the transform.
 	*/
-    ARController.prototype.arglCameraViewRHf = function(glMatrix, glRhMatrix, scale)
+    ARController.arglCameraViewRHf = function(glMatrix, glRhMatrix, scale)
     {
         var m_modelview;
         if(glRhMatrix == undefined)

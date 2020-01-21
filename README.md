@@ -2,7 +2,7 @@
 
 Emscripten port of [ARToolKit](https://github.com/artoolkitx/artoolkit5) to JavaScript.
 
-## MArkers Types
+## Markers Types
 
 JSARToolKit5 support these types of markers:
 - Square pictorial markers

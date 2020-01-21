@@ -7,9 +7,11 @@
   "keywords": [
     "ARToolKit",
     "AR",
-    "Augmented Reality"
+    "Augmented Reality",
+    "WebAR",
+    "JavaScript"
   ],
-  "author": "ARToolKit (https://github.com/artoolkit)",
+  "author": "ARToolKit (https://github.com/artoolkitx)",
   "repository": "git://https://github.com/artoolkitx/jsartoolkit5.git",
   "homepage": "https://github.com/artoolkitx/jsartoolkit5",
   "contributors": [

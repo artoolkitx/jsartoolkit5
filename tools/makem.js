@@ -8,11 +8,22 @@
 var
 	exec = require('child_process').exec,
 	path = require('path'),
-  fs = require('fs'),
-  os = require('os'),
+	fs = require('fs'),
+	os = require('os'),
 	child;
 
 const platform = os.platform();
+
+var NO_LIBAR = false;
+
+var arguments = process.argv;
+
+for (var j = 2; j < arguments.length; j++) {
+	if (arguments[j] == '--no-libar') {
+		NO_LIBAR = true;
+		console.log('Building jsartoolkit5 with --no-libar option, libar will be preserved.');
+	};
+}
 
 var HAVE_NFT = 1;
 
@@ -74,7 +85,7 @@ function matchAll(patterns, prefix="") {
     return r;
 }
 
-	ar_sources = matchAll([
+  ar_sources = matchAll([
     'AR/arLabelingSub/*.c',
     'AR/*.c',
     'ARICP/*.c',
@@ -157,6 +168,7 @@ FLAGS += ' -s TOTAL_MEMORY=' + MEM + ' ';
 FLAGS += ' -s USE_ZLIB=1';
 FLAGS += ' -s USE_LIBJPEG';
 FLAGS += ' --memory-init-file 0 '; // for memless file
+FLAGS += ' -s ALLOW_MEMORY_GROWTH=1';
 
 var WASM_FLAGS = ' -s BINARYEN_TRAP_MODE=clamp'
 
@@ -166,10 +178,8 @@ FLAGS += ' --bind ';
 
 /* DEBUG FLAGS */
 var DEBUG_FLAGS = ' -g ';
-// DEBUG_FLAGS += ' -s ASSERTIONS=2 '
 DEBUG_FLAGS += ' -s ASSERTIONS=1 '
 DEBUG_FLAGS += ' --profiling '
-// DEBUG_FLAGS += ' -s EMTERPRETIFY_ADVISE=1 '
 DEBUG_FLAGS += ' -s ALLOW_MEMORY_GROWTH=1';
 DEBUG_FLAGS += '  -s DEMANGLE_SUPPORT=1 ';
 
@@ -196,8 +206,12 @@ function clean_builds() {
 
     try {
         var files = fs.readdirSync(OUTPUT_PATH);
-        if (files.length > 0)
-            for (var i = 0; i < files.length; i++) {
+				var filesLength = files.length;
+        if (filesLength > 0)
+				if (NO_LIBAR == true){
+					filesLength -= 1;
+				}
+            for (var i = 0; i < filesLength; i++) {
                 var filePath = OUTPUT_PATH + '/' + files[i];
                 if (fs.statSync(filePath).isFile())
                     fs.unlinkSync(filePath);
@@ -232,11 +246,6 @@ var compile_wasm = format(EMCC + ' ' + INCLUDES + ' '
     + ALL_BC + MAIN_SOURCES
     + FLAGS + WASM_FLAGS + DEFINES + PRE_FLAGS + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
     OUTPUT_PATH, OUTPUT_PATH, BUILD_WASM_FILE);
-
-var compile_all = format(EMCC + ' ' + INCLUDES + ' '
-    + ar_sources.join(' ')
-    + FLAGS + ' ' + DEFINES + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
-    OUTPUT_PATH, BUILD_DEBUG_FILE);
 
 /*
  * Run commands
@@ -278,11 +287,12 @@ function addJob(job) {
 
 addJob(clean_builds);
 addJob(compile_arlib);
-//addJob(compile_kpm);
-// compile_kpm
 addJob(compile_combine);
 addJob(compile_wasm);
 addJob(compile_combine_min);
-// addJob(compile_all);
+
+if (NO_LIBAR == true){
+  jobs.splice(1,1);
+}
 
 runJob();

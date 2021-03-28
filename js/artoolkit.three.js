@@ -158,8 +158,8 @@
 					var ac = renderer.autoClear;
 					renderer.autoClear = false;
 					renderer.clear();
-					renderer.render(this.videoScene, this.videoCamera);
-					renderer.render(this.scene, this.camera);
+					renderer.render(videoScene, videoCamera);
+					renderer.render(scene, camera);
 					renderer.autoClear = ac;
 				}
 			};
